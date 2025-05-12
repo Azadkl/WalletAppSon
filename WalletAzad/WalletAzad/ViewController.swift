@@ -181,6 +181,35 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return filteredTransactions.count
     }
 
+    // Hücreyi sola kaydırınca silme işlemi
+func tableView(_ tableView: UITableView,
+               commit editingStyle: UITableViewCell.EditingStyle,
+               forRowAt indexPath: IndexPath) {
+    if editingStyle == .delete {
+        // Filtrelenmiş listedeki veriyi sil
+        let transactionToDelete = filteredTransactions[indexPath.row]
+        
+        // Orijinal transactions dizisinden de sil
+        if let originalIndex = transactions.firstIndex(where: {
+            $0.date == transactionToDelete.date &&
+            $0.amount == transactionToDelete.amount &&
+            $0.category == transactionToDelete.category &&
+            $0.type == transactionToDelete.type
+        }) {
+            transactions.remove(at: originalIndex)
+        }
+
+        // Filtrelenmiş listeden kaldır
+        filteredTransactions.remove(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .automatic)
+
+        // Bakiye ve UI'yı güncelle
+        updateBalance()
+        updateBalanceLabel()
+        saveTransactionsToFile()
+    }
+}
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let transaction = filteredTransactions[indexPath.row]
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
